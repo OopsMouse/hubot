@@ -497,7 +497,7 @@ class Robot
 
     if @proxy?
       tunnelFunc = null
-      if url.parse(url).protocol is 'https:'
+      if Url.parse(url).protocol is 'https:'
         tunnelFunc = if @proxy.protocol is 'https:' then Tunnel.httpsOverHttps else Tunnel.httpsOverHttp
       else
         tunnelFunc = if @proxy.protocol is 'https:' then Tunnel.httpOverHttps else  Tunnel.httpOverHttp
