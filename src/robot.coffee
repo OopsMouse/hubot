@@ -1,7 +1,9 @@
 Fs             = require 'fs'
+Url            = require 'url'
 Log            = require 'log'
 Path           = require 'path'
 HttpClient     = require 'scoped-http-client'
+Tunnel         = require 'tunnel'
 {EventEmitter} = require 'events'
 
 User = require './user'
@@ -38,7 +40,7 @@ class Robot
   # name        - A String of the robot name, defaults to Hubot.
   #
   # Returns nothing.
-  constructor: (adapterPath, adapter, httpd, name = 'Hubot') ->
+  constructor: (adapterPath, adapter, httpd, name = 'Hubot', proxyUrl) ->
     @name      = name
     @events    = new EventEmitter
     @brain     = new Brain @
@@ -49,6 +51,7 @@ class Robot
     @listeners = []
     @logger    = new Log process.env.HUBOT_LOG_LEVEL or 'info'
     @pingIntervalId = null
+    @proxy     = if proxyUrl then Url.parse(proxyUrl) else null
 
     @parseVersion()
     if httpd
@@ -490,6 +493,19 @@ class Robot
   #
   # Returns a ScopedClient instance.
   http: (url, options) ->
+    options = merge {}, options
+
+    if @proxy?
+      tunnelFunc = if @proxy.protocol is 'https' then Tunnel.httpsOverHttps else Tunnel.httpsOverHttp
+
+      tunnelAgent = tunnelFunc {
+        proxy:
+          host: @proxy.hostname,
+          port: @proxy.port
+      }
+
+      options.agent = tunnelAgent
+
     HttpClient.create(url, options)
       .header('User-Agent', "Hubot/#{@version}")
 

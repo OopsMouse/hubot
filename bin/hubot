@@ -28,6 +28,7 @@ Options =
   scripts:     process.env.HUBOT_SCRIPTS or []
   name:        process.env.HUBOT_NAME    or "Hubot"
   path:        process.env.HUBOT_PATH    or "."
+  proxy:       process.env.HUBOT_PROXY   or null
   configCheck: false
 
 Parser = new OptParse.OptionParser(Switches)
@@ -80,7 +81,7 @@ if Options.create
 else
   adapterPath = Path.join __dirname, "..", "src", "adapters"
 
-  robot = Hubot.loadBot adapterPath, Options.adapter, Options.enableHttpd, Options.name
+  robot = Hubot.loadBot adapterPath, Options.adapter, Options.enableHttpd, Options.name, Options.proxy
 
   if Options.version
     console.log robot.version
